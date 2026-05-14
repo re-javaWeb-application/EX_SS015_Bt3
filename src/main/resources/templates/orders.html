@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lịch sử đơn hàng</title>
+</head>
+<body>
+
+<h2>Lịch sử đơn hàng</h2>
+
+<form th:action="@{/orders}" method="get">
+    <label for="status">Trạng thái:</label>
+    <select name="status" id="status">
+        <option value="ALL" th:selected="${status == 'ALL' || status == null}">Tất cả</option>
+        <option value="PENDING" th:selected="${status == 'PENDING'}">Chờ xử lý</option>
+        <option value="DELIVERING" th:selected="${status == 'DELIVERING'}">Đang giao</option>
+        <option value="COMPLETED" th:selected="${status == 'COMPLETED'}">Đã giao</option>
+        <option value="CANCELLED" th:selected="${status == 'CANCELLED'}">Đã hủy</option>
+    </select>
+
+    <input type="hidden" name="sortBy" th:value="${sortBy}" />
+    <input type="hidden" name="sortDir" th:value="${sortDir}" />
+    
+    <button type="submit">Lọc</button>
+</form>
+
+<br/>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Trạng thái</th>
+            <th>
+                <a th:href="@{/orders(page=${currentPage}, status=${status}, sortBy='totalAmount', sortDir=${sortDir == 'asc' ? 'desc' : 'asc'})}">
+                    Tổng tiền
+                </a>
+            </th>
+            <th>
+                <a th:href="@{/orders(page=${currentPage}, status=${status}, sortBy='createdAt', sortDir=${sortDir == 'asc' ? 'desc' : 'asc'})}">
+                    Ngày tạo
+                </a>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="order : ${orders}">
+            <td th:text="${order.id}"></td>
+            <td th:text="${order.status}"></td>
+            <td th:text="${order.totalAmount}"></td>
+            <td th:text="${order.createdAt}"></td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(orders)}">
+            <td colspan="4">Không có đơn hàng nào</td>
+        </tr>
+    </tbody>
+</table>
+
+<br/>
+
+<div>
+    <span>Tổng số: <strong th:text="${totalItems}">0</strong> đơn hàng</span>
+    | Trang: <span th:text="${currentPage}">1</span> / <span th:text="${totalPages > 0 ? totalPages : 1}">1</span>
+</div>
+
+<br/>
+
+<div th:if="${totalPages > 1}">
+    <span th:each="i : ${#numbers.sequence(1, totalPages)}">
+        <a th:if="${currentPage != i}" 
+           th:href="@{/orders(page=${i}, status=${status}, sortBy=${sortBy}, sortDir=${sortDir})}" 
+           th:text="${i}">
+        </a>
+        <span th:if="${currentPage == i}" th:text="${i}" style="font-weight: bold; text-decoration: underline;"></span>
+        &nbsp;
+    </span>
+</div>
+
+</body>
+</html>
